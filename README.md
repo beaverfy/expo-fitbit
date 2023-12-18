@@ -1,4 +1,5 @@
 <img src="https://github.com/beaverfy/expo-fitbit/raw/main/expo-fitbit.png" alt="Expo Fitbit by beaverfy" width="100%">
+
 # @beaverfy/expo-fitbit
 Add fitbit authentication to your expo managed react native apps
 
