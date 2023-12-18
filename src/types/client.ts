@@ -1,3 +1,5 @@
+import { ProfileData } from "./api";
+
 export interface ClientStorage {
     set: (key: string, value: string) => unknown;
     get: (key: string) => unknown;
@@ -10,7 +12,13 @@ export interface Configuration {
     scopes: string[];
     storage: ClientStorage;
     debugLogs?: boolean;
-    onLogin?: () => unknown;
+    onLogin?: (user: ProfileData) => unknown;
+}
+
+export interface FitbitProviderData {
+    userData: ProfileData | undefined;
+    isLoading: boolean;
+    isLoggedIn: boolean;
 }
 
 export enum StorageKeys {

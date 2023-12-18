@@ -4,5 +4,21 @@
   "main": "dist/index.js",
   "repository": "https://github.com/beaverfy/expo-fitbit.git",
   "author": "Turtlepaw <81275769+Turtlepaw@users.noreply.github.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf ./dist",
+    "build": "yarn run clean && tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
+    "add": "^2.0.6",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "expo": "^49.0.21",
+    "expo-auth-session": "^5.2.0",
+    "react": "^18.2.0",
+    "react-native": "^0.73.0"
+  }
 }
