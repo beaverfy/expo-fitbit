@@ -1,5 +1,5 @@
 {
-  "name": "expo-fitbit",
+  "name": "@beaverfy/expo-fitbit",
   "version": "1.0.0",
   "main": "dist/index.js",
   "repository": "https://github.com/beaverfy/expo-fitbit.git",
@@ -10,12 +10,14 @@
     "build": "yarn run clean && tsc"
   },
   "devDependencies": {
+    "@types/base-64": "^1.0.2",
     "@types/node": "^20.10.5",
     "@types/react": "^18.2.45",
     "add": "^2.0.6",
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "base-64": "^1.0.0",
     "expo": "^49.0.21",
     "expo-auth-session": "^5.2.0",
     "react": "^18.2.0",

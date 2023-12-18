@@ -24,13 +24,35 @@ Once you've created your app, edit your app to have the redirect url: `scheme://
 Wrap your app in `FitbitProvider`:
 ```tsx
 import { FitbitProvider } from "@beaverfy/expo-fitbit";
+import Constants from "expo-constants";
+import { MMKV } from 'react-native-mmkv';
+export const storage = new MMKV({
+    id: `authentication`,
+    encryptionKey: 'random-password'
+});
 
-<FitbitProvider>
+<FitbitProvider configuration={{
+    clientId: "CLIENT_ID",
+    clientSecret: "CLIENT_SECRET",
+    appScheme: Constants.expoConfig.scheme,
+    scopes: ["profile"],
+    storage: {
+        get: (key) => storage.getString(key),
+        set: (key, value) => storage.set(key, value)
+    },
+    onLogin(user) => console.log("User logged in:", user);
+}}>
     {/* app code... */}
 </FitbitProvider>
 ```
 
 Get the user's profile data with the `useFitbit` hook:
 ```tsx
-const {} = useFitbit();
+const {
+    userData,
+    isLoading,
+    isLoggedIn
+} = useFitbit();
+
+return <Text>Logged in as: {userData?.name}</Text>
 ```
