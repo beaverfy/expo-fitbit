@@ -1,6 +1,6 @@
 {
   "name": "@beaverfy/expo-fitbit",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "dist/index.js",
   "repository": "https://github.com/beaverfy/expo-fitbit.git",
   "author": "Turtlepaw <81275769+Turtlepaw@users.noreply.github.com>",
