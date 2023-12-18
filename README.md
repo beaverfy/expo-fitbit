@@ -17,3 +17,20 @@ npm install @beaverfy/expo-fitbit
 Register an app on [dev.fitbit.com](https://dev.fitbit.com/apps/new), fill out your app details and select client, since we'll be using the credentials in our app
 
 Once you've created your app, edit your app to have the redirect url: `scheme://fitbit` (replacing scheme with your app's scheme)
+
+### Intergrating into your project
+> We're still working on this section
+
+Wrap your app in `FitbitProvider`:
+```tsx
+import { FitbitProvider } from "@beaverfy/expo-fitbit";
+
+<FitbitProvider>
+    {/* app code... */}
+</FitbitProvider>
+```
+
+Get the user's profile data with the `useFitbit` hook:
+```tsx
+const {} = useFitbit();
+```
