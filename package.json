@@ -1,6 +1,6 @@
 {
   "name": "@beaverfy/expo-fitbit",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "main": "dist/index.js",
   "bugs": {
     "url": "https://github.com/beaverfy/expo-fitbit/issues"
@@ -19,7 +19,6 @@
     "@types/base-64": "^1.0.2",
     "@types/node": "^20.10.5",
     "@types/react": "^18.2.45",
-    "add": "^2.0.6",
     "typescript": "^5.3.3"
   },
   "dependencies": {
