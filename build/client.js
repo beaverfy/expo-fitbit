@@ -1,51 +1,33 @@
 import { makeRedirectUri, useAuthRequest } from "expo-auth-session";
-import { Configuration, StorageKeys } from "./types/client";
+import { StorageKeys } from "./types/client";
 import ExpoFitbitError from "./utils/error";
 import { discovery } from "./utils/constants";
 import { useCallback, useEffect, useState } from "react";
-import { Methods, OAuthResult, ProfileData } from "./types/api";
+import { Methods } from "./types/api";
 import { Routes } from "./utils/routes";
 import { stringify } from "qs";
 import { encode } from "base-64";
-
 export class FitbitClient {
-    public configuration: Configuration;
-    constructor(configuration: Configuration) {
+    configuration;
+    constructor(configuration) {
         this.configuration = configuration;
     }
-
-    private buildRedirectURL() {
-        if (!this.configuration.appScheme) throw new ExpoFitbitError("Looks like you forgot to add appScheme to your config")
+    buildRedirectURL() {
+        if (!this.configuration.appScheme)
+            throw new ExpoFitbitError("Looks like you forgot to add appScheme to your config");
         return makeRedirectUri({
             scheme: this.configuration.appScheme,
             path: "fitbit"
         });
     }
-
-    private async fetchProfile({ access_token, token_type }: {
-        access_token: string;
-        token_type: string;
-    }): Promise<ProfileData> {
+    async fetchProfile({ access_token, token_type }) {
         const fetched = await fetch(Routes.Profile(), {
             headers: {
                 'Authorization': `${token_type} ${access_token}`,
                 'Accept': 'application/json'
             }
         });
-
-        const jsonData = await fetched.json() as {
-            user: {
-                avatar: string;
-                displayName: string;
-                avatar150: string;
-                avatar640: string;
-                encodedId: string;
-                firstName: string;
-                lastName: string;
-                country: string;
-            }
-        };
-
+        const jsonData = await fetched.json();
         return {
             email: jsonData.user.encodedId,
             family_name: jsonData.user.lastName,
@@ -57,8 +39,7 @@ export class FitbitClient {
             verified_email: true
         };
     }
-
-    private async refreshToken(refresh_token: string) {
+    async refreshToken(refresh_token) {
         const result = await fetch(Routes.Token(), {
             method: Methods.Post,
             body: stringify({
@@ -67,35 +48,30 @@ export class FitbitClient {
             }),
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded",
-                "Authorization":
-                    'Basic ' +
+                "Authorization": 'Basic ' +
                     encode(this.configuration.clientId + ':' + this.configuration.clientSecret),
                 "Accept": 'application/json, text/plain, */*',
                 "grant_type": "refresh_token"
             },
-        }).then(r => r.json()) as OAuthResult;
-
+        }).then(r => r.json());
         if (typeof result?.access_token == "string") {
             this.configuration.storage.set(StorageKeys.OAuth, JSON.stringify(result));
             return result;
-        } else throw new ExpoFitbitError("Couldn't get a new pair of access tokens");
+        }
+        else
+            throw new ExpoFitbitError("Couldn't get a new pair of access tokens");
     }
-
     useConfiguration() {
-        const [userData, setUserData] = useState<ProfileData>();
+        const [userData, setUserData] = useState();
         const [isLoading, setLoading] = useState(false);
         const [isLoggedIn, setIsLoggedIn] = useState(false);
-        const [access_token, setAccessToken] = useState<string>();
-        const [token_type, setTokenType] = useState<string>();
-        const [request, response, promptAsync] = useAuthRequest(
-            {
-                clientId: this.configuration.clientId,
-                scopes: this.configuration.scopes,
-                redirectUri: this.buildRedirectURL()
-            },
-            discovery
-        );
-
+        const [access_token, setAccessToken] = useState();
+        const [token_type, setTokenType] = useState();
+        const [request, response, promptAsync] = useAuthRequest({
+            clientId: this.configuration.clientId,
+            scopes: this.configuration.scopes,
+            redirectUri: this.buildRedirectURL()
+        }, discovery);
         const refreshProfile = useCallback(() => {
             (async () => {
                 if (!access_token || token_type) {
@@ -103,33 +79,33 @@ export class FitbitClient {
                         error: true,
                         message: "access_token and/or token_type is undefined (user not logged in)"
                     };
-
-                    if (this.configuration.debugLogs) console.log(error);
+                    if (this.configuration.debugLogs)
+                        console.log(error);
                     return error;
-                } else {
+                }
+                else {
                     const val = await this.fetchProfile({
-                        access_token: access_token as string,
-                        token_type: token_type as string
+                        access_token: access_token,
+                        token_type: token_type
                     });
-
                     setUserData(val);
                     const message = {
                         error: false,
                         message: "Fetched and updated user profile data"
                     };
-
-                    if (this.configuration.debugLogs) console.log(message);
+                    if (this.configuration.debugLogs)
+                        console.log(message);
                     return message;
                 }
             })();
         }, [access_token, token_type]);
-
         useEffect(() => {
             if (response?.type === 'success') {
                 setLoading(true);
                 const { code } = response.params;
                 (async () => {
-                    if (!request?.codeVerifier) throw new ExpoFitbitError("request.codeVerifier is undefined");
+                    if (!request?.codeVerifier)
+                        throw new ExpoFitbitError("request.codeVerifier is undefined");
                     const body = new URLSearchParams({
                         'client_id': this.configuration.clientId,
                         'code': code,
@@ -137,42 +113,41 @@ export class FitbitClient {
                         'grant_type': 'authorization_code',
                         'redirect_uri': this.buildRedirectURL()
                     });
-
                     await fetch(`${discovery.tokenEndpoint}?${body.toString()}`, {
                         method: "POST",
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded'
                         },
                         body
-                    }).then(async r => {
+                    }).then(async (r) => {
                         if (r.status == 200) {
-                            const rslt = await r.json() as OAuthResult;
+                            const rslt = await r.json();
                             this.configuration.storage.set(StorageKeys.OAuth, JSON.stringify({
                                 ...rslt,
                                 expiryStart: new Date().toISOString()
                             }));
-
                             this.fetchProfile({
                                 access_token: rslt.access_token,
                                 token_type: rslt.token_type
                             })
                                 .then(val => {
-                                    if (this.configuration.onLogin) this.configuration.onLogin(val);
-                                    setIsLoggedIn(true);
-                                    setUserData(val);
-                                    setLoading(false);
-                                });
+                                if (this.configuration.onLogin)
+                                    this.configuration.onLogin(val);
+                                setIsLoggedIn(true);
+                                setUserData(val);
+                                setLoading(false);
+                            });
                         }
-                    })
+                    });
                 })();
             }
         }, [response]);
-
         return {
             userData,
             isLoading,
             isLoggedIn,
             refreshProfile
-        }
+        };
     }
 }
+//# sourceMappingURL=client.js.map
