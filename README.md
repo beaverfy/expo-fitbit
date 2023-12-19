@@ -1,7 +1,10 @@
-<img src="./expo-fitbit.png" alt="Expo Fitbit by beaverfy" width="100%">
+<img src="./images/expo-fitbit.png" alt="Expo Fitbit by beaverfy" width="100%">
 
 # @beaverfy/expo-fitbit
-Add fitbit authentication to your expo managed react native apps
+`@beaverfy/expo-fitbit` adds fitbit authentication to your expo-managed react native apps
+
+### Why use `@beaverfy/expo-fitbit`?
+- Easy intergration to your project
 
 ## Getting Started
 ### Installation
@@ -20,10 +23,25 @@ Register an app on [dev.fitbit.com](https://dev.fitbit.com/apps/new), fill out y
 Once you've created your app, edit your app to have the redirect url: `scheme://fitbit` (replacing scheme with your app's scheme)
 
 ### Intergrating into your project
-> We're still working on this section
-
-Wrap your app in `FitbitProvider`:
+#### Wrap your app in `FitbitProvider`:
 ```tsx
+<FitbitProvider configuration={{
+    //...
+}}>
+    {/* app code... */}
+</FitbitProvider>
+```
+#### Get the current user
+```tsx
+const {
+    userData,
+    isLoading,
+    isLoggedIn
+} = useFitbitProvider();
+```
+### Working example
+```tsx
+//app.tsx
 import { FitbitProvider } from "@beaverfy/expo-fitbit";
 import Constants from "expo-constants";
 import { MMKV } from 'react-native-mmkv';
@@ -32,28 +50,35 @@ export const storage = new MMKV({
     encryptionKey: 'random-password'
 });
 
-<FitbitProvider configuration={{
-    clientId: "CLIENT_ID",
-    clientSecret: "CLIENT_SECRET",
-    appScheme: Constants.expoConfig.scheme,
-    scopes: ["profile"],
-    storage: {
-        get: (key) => storage.getString(key),
-        set: (key, value) => storage.set(key, value)
-    },
-    onLogin(user) => console.log("User logged in:", user);
-}}>
-    {/* app code... */}
-</FitbitProvider>
+export default function App(){
+    return (
+        <FitbitProvider configuration={{
+            clientId: "CLIENT_ID",
+            clientSecret: "CLIENT_SECRET",
+            appScheme: Constants.expoConfig.scheme,
+            scopes: ["profile"],
+            storage: {
+                get: (key) => storage.getString(key),
+                set: (key, value) => storage.set(key, value)
+            },
+            onLogin(user) => console.log("User logged in:",    user);
+        }}>
+            {/* app code... */}
+        </FitbitProvider>
+    );
+}
 ```
-
-Get the user's profile data with the `useFitbit` hook:
 ```tsx
-const {
-    userData,
-    isLoading,
-    isLoggedIn
-} = useFitbit();
+//home.tsx
+import { useFitbitProvider } from "@beaverfy/expo-fitbit";
 
-return <Text>Logged in as: {userData?.name}</Text>
+export default function Home(){
+    const {
+        userData,
+        isLoading,
+        isLoggedIn
+    } = useFitbit();
+
+    return <Text>Logged in as: {userData?.name}</Text>
+}
 ```
