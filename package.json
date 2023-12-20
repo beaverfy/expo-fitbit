@@ -13,7 +13,8 @@
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf ./build",
-    "build": "yarn run clean && tsc"
+    "build": "yarn run clean && tsc",
+    "prepare": "yarn run build"
   },
   "devDependencies": {
     "@types/base-64": "^1.0.2",
