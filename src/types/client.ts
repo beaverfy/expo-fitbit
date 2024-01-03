@@ -19,6 +19,7 @@ export interface FitbitProviderData {
     userData: ProfileData | undefined;
     isLoading: boolean;
     isLoggedIn: boolean;
+    promptAsync: () => void;
 }
 
 export enum StorageKeys {
