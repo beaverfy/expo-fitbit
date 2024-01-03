@@ -11,6 +11,7 @@ export declare class FitbitClient {
         isLoading: boolean;
         isLoggedIn: boolean;
         refreshProfile: () => void;
+        promptAsync: (options?: import("expo-auth-session").AuthRequestPromptOptions | undefined) => Promise<import("expo-auth-session").AuthSessionResult>;
     };
 }
 //# sourceMappingURL=client.d.ts.map

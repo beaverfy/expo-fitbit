@@ -16,6 +16,7 @@ export interface FitbitProviderData {
     userData: ProfileData | undefined;
     isLoading: boolean;
     isLoggedIn: boolean;
+    promptAsync: () => void;
 }
 export declare enum StorageKeys {
     OAuth = "fitbit_oauth_data"

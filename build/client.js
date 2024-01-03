@@ -146,7 +146,8 @@ export class FitbitClient {
             userData,
             isLoading,
             isLoggedIn,
-            refreshProfile
+            refreshProfile,
+            promptAsync
         };
     }
 }
