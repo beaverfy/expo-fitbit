@@ -14,7 +14,8 @@
   "scripts": {
     "clean": "rm -rf ./build",
     "build": "yarn run clean && tsc",
-    "prepare": "yarn run build"
+    "prepare": "yarn run build",
+    "release": "release-it"
   },
   "devDependencies": {
     "@types/base-64": "^1.0.2",
@@ -28,6 +29,7 @@
     "expo": "^49.0.21",
     "expo-auth-session": "^5.2.0",
     "react": "^18.2.0",
-    "react-native": "^0.73.0"
+    "react-native": "^0.73.0",
+    "release-it": "^17.0.1"
   }
 }
