@@ -1,0 +1,33 @@
+{
+  "name": "@beaverfy/expo-fitbit",
+  "version": "1.0.9",
+  "main": "build/index.js",
+  "bugs": {
+    "url": "https://github.com/beaverfy/expo-fitbit/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beaverfy/expo-fitbit.git"
+  },
+  "author": "Turtlepaw <81275769+Turtlepaw@users.noreply.github.com>",
+  "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf ./build",
+    "build": "yarn run clean && tsc",
+    "prepare": "yarn run build"
+  },
+  "devDependencies": {
+    "@types/base-64": "^1.0.2",
+    "@types/node": "^20.10.5",
+    "@types/react": "^18.2.45",
+    "expo-module-scripts": "^3.1.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "base-64": "^1.0.0",
+    "expo": "^49.0.21",
+    "expo-auth-session": "^5.2.0",
+    "react": "^18.2.0",
+    "react-native": "^0.73.0"
+  }
+}

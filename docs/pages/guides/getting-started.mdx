@@ -1,0 +1,102 @@
+import { Callout } from "nextra-theme-docs";
+import { Steps, Tabs } from 'nextra/components'
+
+# Getting Started
+## Obtaining Credentials
+Register an app on [dev.fitbit.com](https://dev.fitbit.com/apps/new) with these details:
+
+- Application Name: the name of your app
+- Description: a description of your app (e.g. what your app does)
+- Application Website URL: the website of your app or organization
+- Organization: the name of your organization (you may be able to use your username instead)
+- Organization Website URL: the website of your organization (you may be able to use your personal website instead)
+- Terms of Service URL: the terms of service of your app
+- Privacy Policy URL: the privacy policy of your app
+- OAuth 2.0 Application Type: client (since your oauth is going to be managed by your app)
+- Redirect URL `scheme://fitbit` (replacing scheme with your app's scheme)
+- Default Access Type: If you need to read or read & write
+
+<Callout type="warning">
+It's important to add the `fitbit` path to your redirect URL or you'll get a 404 when trying to authorize your app
+</Callout>
+
+## Intergrating into your project
+<Steps>
+### Wrap your app in `FitbitProvider`
+```tsx
+<FitbitProvider configuration={{
+    // configuration
+}}>
+    {/* app code... */}
+</FitbitProvider>
+```
+### Retrieve the current user
+<Tabs items={['With Comments', 'Without Comments']}>
+<Tabs.Tab>
+```tsx
+const {
+    // The user's data (avatar, name, etc...)
+    userData,
+    // If the user data is loading
+    isLoading,
+    // If there is a user currently logged in
+    isLoggedIn
+} = useFitbitProvider();
+```
+</Tabs.Tab>
+  <Tabs.Tab>
+```tsx
+const {
+    userData,
+    isLoading,
+    isLoggedIn
+} = useFitbitProvider();
+```
+  </Tabs.Tab>
+</Tabs>
+</Steps>
+
+### Working example
+This example uses [`react-native-mmkv`](https://github.com/mrousavy/react-native-mmkv) to store authentication tokens:
+```tsx
+//app.tsx
+import { FitbitProvider } from "@beaverfy/expo-fitbit";
+import Constants from "expo-constants";
+import { MMKV } from 'react-native-mmkv';
+export const storage = new MMKV({
+    id: `authentication`,
+    encryptionKey: 'random-password'
+});
+
+export default function App(){
+    return (
+        <FitbitProvider configuration={{
+            clientId: "CLIENT_ID",
+            clientSecret: "CLIENT_SECRET",
+            appScheme: Constants.expoConfig.scheme,
+            scopes: ["profile"],
+            storage: {
+                get: (key) => storage.getString(key),
+                set: (key, value) => storage.set(key, value)
+            },
+            onLogin(user) => console.log("User logged in:",    user);
+        }}>
+            {/* app code... */}
+        </FitbitProvider>
+    );
+}
+```
+```tsx
+//home.tsx
+import { useFitbitProvider } from "@beaverfy/expo-fitbit";
+
+export default function Home(){
+    const {
+        userData,
+        isLoading,
+        isLoggedIn
+    } = useFitbit();
+
+    return <Text>Logged in as: {userData?.name}</Text>
+}
+```

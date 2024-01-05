@@ -1,0 +1,22 @@
+import { Callout } from "nextra-theme-docs";
+import { Steps, Tabs } from 'nextra/components'
+
+# Authorizing a User
+We've now got expo fitbit intergrated in our project, so let's let users sign in with their fitbit account:
+
+<Steps>
+### Retrieve `promptAsync` from `useFitbitProvider`
+```tsx
+const {
+    promptAsync
+} = useFitbitProvider();
+```
+### Add it to your button
+```tsx
+<Button onPress={() => promptAsync()}>Log in with Fitbit</Button>
+```
+<Callout type="info">
+In some cases you may want to disable the button if there is a user currently logged in, you can do this by retrieving `isLoggedIn` from `useFitbitProvider()`
+</Callout>
+
+</Steps>
