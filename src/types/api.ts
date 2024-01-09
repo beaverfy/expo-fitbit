@@ -5,7 +5,10 @@ export interface OAuthResult {
     scope: string;
     token_type: string;
     user_id: string;
-    expiryStart: string;
+}
+
+export interface OAuthStorageValue extends OAuthResult {
+    created_at: number;
 }
 
 export interface ProfileData {

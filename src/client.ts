@@ -3,15 +3,25 @@ import { Configuration, StorageKeys } from "./types/client";
 import ExpoFitbitError from "./utils/error";
 import { discovery } from "./utils/constants";
 import { useCallback, useEffect, useState } from "react";
-import { Methods, OAuthResult, ProfileData } from "./types/api";
+import { Methods, OAuthResult, OAuthStorageValue, ProfileData } from "./types/api";
 import { Routes } from "./utils/routes";
 import { stringify } from "qs";
 import { encode } from "base-64";
+import { Logger } from "./utils/logger";
 
+/**
+ * #### ⚠️ NOT INTENDED FOR REGULAR USAGE
+ * 
+ * This class is built to be internal, only use this if you need advanced configuration or use `FitbitProvider` (read more: https://expo-fitbit.vercel.app/guides/getting-started#wrap-your-app-in-fitbitprovider)
+ */
 export class FitbitClient {
     public configuration: Configuration;
+    public logger: Logger = new Logger(false);
     constructor(configuration: Configuration) {
         this.configuration = configuration;
+        if (this.configuration.debugLogs === true) this.logger.setConsoleLog(
+            this.configuration.debugLogs
+        );
     }
 
     private buildRedirectURL() {
@@ -20,6 +30,37 @@ export class FitbitClient {
             scheme: this.configuration.appScheme,
             path: "fitbit"
         });
+    }
+
+    private isTokenValid(created_at: number, expires_in: number) {
+        const now = Date.now() / 1000;
+        const expiry = created_at + expires_in;
+        return now < expiry;
+    }
+
+    private async tryRessurect() {
+        try {
+            const accessTokens = this.configuration.storage.get(StorageKeys.OAuth) as OAuthStorageValue;
+            const { expires_in, created_at, refresh_token } = accessTokens;
+            if (this.isTokenValid(created_at, expires_in)) {
+                this.logger.debug("Token still valid, resurrecting state");
+                const profile = await this.fetchProfile(accessTokens);
+                return {
+                    oauth: accessTokens,
+                    profile
+                };
+            } else {
+                this.logger.debug("Token expired, trying to fetch a new token");
+                const newOAuth = await this.refreshToken(refresh_token);
+                const profile = await this.fetchProfile(newOAuth);
+                return {
+                    oauth: newOAuth,
+                    profile
+                };
+            }
+        } catch (e) {
+            throw new ExpoFitbitError("Couldn't ressurect the old user's state: " + e);
+        }
     }
 
     private async fetchProfile({ access_token, token_type }: {
@@ -33,32 +74,41 @@ export class FitbitClient {
             }
         });
 
-        const jsonData = await fetched.json() as {
-            user: {
-                avatar: string;
-                displayName: string;
-                avatar150: string;
-                avatar640: string;
-                encodedId: string;
-                firstName: string;
-                lastName: string;
-                country: string;
-            }
-        };
+        if (!fetched.ok) {
+            const text = fetched.text();
+            this.logger.error(`Couldn't fetch the user's profile: ` + text);
+            throw new ExpoFitbitError(`Couldn't fetch the user's profile: ${text}`);
+        } else {
+            const jsonData = await fetched.json() as {
+                user: {
+                    avatar: string;
+                    displayName: string;
+                    avatar150: string;
+                    avatar640: string;
+                    encodedId: string;
+                    firstName: string;
+                    lastName: string;
+                    country: string;
+                }
+            };
 
-        return {
-            email: jsonData.user.encodedId,
-            family_name: jsonData.user.lastName,
-            given_name: jsonData.user.firstName,
-            id: jsonData.user.encodedId,
-            locale: jsonData.user.country,
-            name: jsonData.user.displayName,
-            picture: jsonData.user.avatar,
-            verified_email: true
-        };
+            return {
+                email: jsonData.user.encodedId,
+                family_name: jsonData.user.lastName,
+                given_name: jsonData.user.firstName,
+                id: jsonData.user.encodedId,
+                locale: jsonData.user.country,
+                name: jsonData.user.displayName,
+                picture: jsonData.user.avatar,
+                verified_email: false
+            };
+        }
     }
 
-    private async refreshToken(refresh_token: string) {
+    /**
+     * Requests to refresh the user's access tokens using the refresh token and updates the storage key
+     */
+    private async refreshToken(refresh_token: string): Promise<OAuthStorageValue> {
         const result = await fetch(Routes.Token(), {
             method: Methods.Post,
             body: stringify({
@@ -77,7 +127,10 @@ export class FitbitClient {
 
         if (typeof result?.access_token == "string") {
             this.configuration.storage.set(StorageKeys.OAuth, JSON.stringify(result));
-            return result;
+            return {
+                ...result,
+                created_at: Date.now()
+            };
         } else throw new ExpoFitbitError("Couldn't get a new pair of access tokens");
     }
 
@@ -125,6 +178,21 @@ export class FitbitClient {
         }, [access_token, token_type]);
 
         useEffect(() => {
+            // Initial ressurect
+            setLoading(true);
+            this.logger.debug("Attempting to ressurect the old user");
+            (async () => {
+                try {
+                    const ressurected = await this.tryRessurect();
+                    setUserData(ressurected.profile);
+                    setLoading(false);
+                } catch (e) {
+                    this.logger.error(`Couldn't ressurecting, skipping: ${e}`)
+                }
+            })();
+        }, []);
+
+        useEffect(() => {
             if (response?.type === 'success') {
                 setLoading(true);
                 const { code } = response.params;
@@ -146,18 +214,18 @@ export class FitbitClient {
                         body
                     }).then(async r => {
                         if (r.status == 200) {
-                            const rslt = await r.json() as OAuthResult;
+                            const rslt = await r.json() as OAuthStorageValue;
                             this.configuration.storage.set(StorageKeys.OAuth, JSON.stringify({
                                 ...rslt,
-                                expiryStart: new Date().toISOString()
-                            }));
+                                created_at: Date.now()
+                            } as OAuthStorageValue));
 
                             this.fetchProfile({
                                 access_token: rslt.access_token,
                                 token_type: rslt.token_type
                             })
                                 .then(val => {
-                                    if (this.configuration.onLogin) this.configuration.onLogin(val);
+                                    if (this.configuration.onLogin && typeof val == "object") this.configuration.onLogin(val);
                                     setIsLoggedIn(true);
                                     setUserData(val);
                                     setLoading(false);
