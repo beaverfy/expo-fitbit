@@ -38,7 +38,7 @@ export class FitbitClient {
         return now < expiry;
     }
 
-    private async tryRessurect() {
+    private async tryResurrect() {
         try {
             const accessTokens = this.configuration.storage.get(StorageKeys.OAuth) as OAuthStorageValue;
             const { expires_in, created_at, refresh_token } = accessTokens;
@@ -59,7 +59,7 @@ export class FitbitClient {
                 };
             }
         } catch (e) {
-            throw new ExpoFitbitError("Couldn't ressurect the old user's state: " + e);
+            throw new ExpoFitbitError("Couldn't resurrect the old user's state: " + e);
         }
     }
 
@@ -178,16 +178,16 @@ export class FitbitClient {
         }, [access_token, token_type]);
 
         useEffect(() => {
-            // Initial ressurect
+            // Initial resurrect
             setLoading(true);
-            this.logger.debug("Attempting to ressurect the old user");
+            this.logger.debug("Attempting to resurrect the old user");
             (async () => {
                 try {
-                    const ressurected = await this.tryRessurect();
-                    setUserData(ressurected.profile);
+                    const resurrected = await this.tryResurrect();
+                    setUserData(resurrected.profile);
                     setLoading(false);
                 } catch (e) {
-                    this.logger.error(`Couldn't ressurecting, skipping: ${e}`)
+                    this.logger.error(`Couldn't resurrecting, skipping: ${e}`)
                 }
             })();
         }, []);
