@@ -1,6 +1,6 @@
 {
   "name": "@beaverfy/expo-fitbit",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "main": "build/index.js",
   "bugs": {
     "url": "https://github.com/beaverfy/expo-fitbit/issues"
