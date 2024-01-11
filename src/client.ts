@@ -131,7 +131,7 @@ export class FitbitClient {
                 ...result,
                 created_at: Date.now()
             };
-        } else throw new ExpoFitbitError("Couldn't get a new pair of access tokens");
+        } else throw new ExpoFitbitError("Couldn't get a new pair of access tokens: " + result);
     }
 
     useConfiguration() {
@@ -187,7 +187,7 @@ export class FitbitClient {
                     setUserData(resurrected.profile);
                     setLoading(false);
                 } catch (e) {
-                    this.logger.error(`Couldn't resurrecting, skipping: ${e}`)
+                    this.logger.error(`Couldn't resurrect, skipping: ${e}`)
                 }
             })();
         }, []);
