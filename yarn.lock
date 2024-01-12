@@ -1756,6 +1756,7 @@ __metadata:
     base-64: ^1.0.0
     dotenv-cli: ^7.3.0
     expo-module-scripts: ^3.1.0
+    qs: ^6.11.2
     react-native: ^0.73.1
     release-it: ^17.0.1
     typescript: ^5.3.3
@@ -9265,6 +9266,15 @@ __metadata:
   dependencies:
     escape-goat: ^4.0.0
   checksum: 0e4f4ab6bbdce600fa6d23b1833f1af57b2641246ff4cbe10f9d66e4e5479b0de2864a88d5bd629eef59524eda3c6680726acd7f3f873d9ed46b7f095d0bb5f6
+  languageName: node
+  linkType: hard
+
+"qs@npm:^6.11.2":
+  version: 6.11.2
+  resolution: "qs@npm:6.11.2"
+  dependencies:
+    side-channel: ^1.0.4
+  checksum: e812f3c590b2262548647d62f1637b6989cc56656dc960b893fe2098d96e1bd633f36576f4cd7564dfbff9db42e17775884db96d846bebe4f37420d073ecdc0b
   languageName: node
   linkType: hard
 
