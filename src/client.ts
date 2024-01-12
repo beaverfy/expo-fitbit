@@ -125,7 +125,8 @@ export class FitbitClient {
             },
         };
 
-        this.logger.debug(`Requesting a new access token with options: ${JSON.stringify(options)}`)
+        const revealedTokenLength = 8;
+        this.logger.debug(`Requesting a new access token with refresh token ${refresh_token.slice(0, revealedTokenLength)}${refresh_token.slice(revealedTokenLength, refresh_token.length).replaceAll(/./g, "*")} options: ${JSON.stringify(options)}`)
         const result = await fetch(Routes.Token(), options).then(r => r.json()) as OAuthResult;
 
         if (typeof result?.access_token == "string") {
