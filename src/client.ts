@@ -109,7 +109,7 @@ export class FitbitClient {
      * Requests to refresh the user's access tokens using the refresh token and updates the storage key
      */
     private async refreshToken(refresh_token: string): Promise<OAuthStorageValue> {
-        const result = await fetch(Routes.Token(), {
+        const options: RequestInit = {
             method: Methods.Post,
             body: stringify({
                 grant_type: 'refresh_token',
@@ -123,7 +123,10 @@ export class FitbitClient {
                 "Accept": 'application/json, text/plain, */*',
                 "grant_type": "refresh_token"
             },
-        }).then(r => r.json()) as OAuthResult;
+        };
+
+        this.logger.debug(`Requesting a new access token with options: ${JSON.stringify(options)}`)
+        const result = await fetch(Routes.Token(), options).then(r => r.json()) as OAuthResult;
 
         if (typeof result?.access_token == "string") {
             this.configuration.storage.set(StorageKeys.OAuth, JSON.stringify(result));
