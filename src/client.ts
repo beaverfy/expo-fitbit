@@ -109,6 +109,7 @@ export class FitbitClient {
      * Requests to refresh the user's access tokens using the refresh token and updates the storage key
      */
     private async refreshToken(refresh_token: string): Promise<OAuthStorageValue> {
+        if (refresh_token == null) throw new ExpoFitbitError("No refresh_token provided, there may not be a user currently logged in");
         const options: RequestInit = {
             method: Methods.Post,
             body: stringify({
