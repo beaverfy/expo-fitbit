@@ -131,7 +131,7 @@ export class FitbitClient {
                 ...result,
                 created_at: Date.now()
             };
-        } else throw new ExpoFitbitError("Couldn't get a new pair of access tokens: " + result);
+        } else throw new ExpoFitbitError("Couldn't get a new pair of access tokens: " + JSON.stringify(result));
     }
 
     useConfiguration() {
