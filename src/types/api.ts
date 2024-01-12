@@ -9,6 +9,7 @@ export interface OAuthResult {
 
 export interface OAuthStorageValue extends OAuthResult {
     created_at: number;
+    expires_at: number;
 }
 
 export interface ProfileData {

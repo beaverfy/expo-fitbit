@@ -38,11 +38,20 @@ export class FitbitClient {
         return now < expiry;
     }
 
+    private buildOAuthResult(result: OAuthResult): OAuthStorageValue {
+        return {
+            ...result,
+            created_at: Date.now(),
+            expires_at: Date.now() + result.expires_in
+        }
+    }
+
     private async tryResurrect() {
         try {
             const accessTokens = this.configuration.storage.get(StorageKeys.OAuth) as OAuthStorageValue;
-            const { expires_in, created_at, refresh_token } = accessTokens;
-            if (this.isTokenValid(created_at, expires_in)) {
+            if (accessTokens == null) throw new ExpoFitbitError("Couldn't retrieve access tokens, there might not be a user logged in: " + JSON.stringify(accessTokens));
+            const { expires_at, created_at, refresh_token } = accessTokens;
+            if (this.isTokenValid(created_at, expires_at)) {
                 this.logger.debug("Token still valid, resurrecting state");
                 const profile = await this.fetchProfile(accessTokens);
                 return {
@@ -131,11 +140,11 @@ export class FitbitClient {
         const result = await fetch(Routes.Token(), options).then(r => r.json()) as OAuthResult;
 
         if (typeof result?.access_token == "string") {
-            this.configuration.storage.set(StorageKeys.OAuth, JSON.stringify(result));
-            return {
-                ...result,
-                created_at: Date.now()
-            };
+            this.configuration.storage.set(StorageKeys.OAuth, JSON.stringify(
+                this.buildOAuthResult(result)
+            ));
+
+            return this.buildOAuthResult(result);
         } else throw new ExpoFitbitError("Couldn't get a new pair of access tokens: " + JSON.stringify(result));
     }
 
@@ -219,18 +228,17 @@ export class FitbitClient {
                         body
                     }).then(async r => {
                         if (r.status == 200) {
-                            const rslt = await r.json() as OAuthStorageValue;
-                            this.configuration.storage.set(StorageKeys.OAuth, JSON.stringify({
-                                ...rslt,
-                                created_at: Date.now()
-                            } as OAuthStorageValue));
+                            const result = await r.json() as OAuthResult;
+                            this.configuration.storage.set(StorageKeys.OAuth, JSON.stringify(
+                                this.buildOAuthResult(result)
+                            ));
 
                             this.fetchProfile({
-                                access_token: rslt.access_token,
-                                token_type: rslt.token_type
+                                access_token: result.access_token,
+                                token_type: result.token_type
                             })
                                 .then(val => {
-                                    if (this.configuration.onLogin && typeof val == "object") this.configuration.onLogin(val);
+                                    if (typeof this.configuration.onLogin == "function" && typeof val == "object") this.configuration.onLogin(val);
                                     setIsLoggedIn(true);
                                     setUserData(val);
                                     setLoading(false);
