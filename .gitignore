@@ -131,3 +131,7 @@ dist
 
 # build
 build
+
+# docs
+docs/node_modules
+docs/.yarn/cache

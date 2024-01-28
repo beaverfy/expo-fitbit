@@ -1756,6 +1756,7 @@ __metadata:
     base-64: ^1.0.0
     dotenv-cli: ^7.3.0
     expo-module-scripts: ^3.1.0
+    expo-secure-store: ^12.8.1
     qs: ^6.11.2
     react-native: ^0.73.1
     release-it: ^17.0.1
@@ -1763,6 +1764,7 @@ __metadata:
   peerDependencies:
     expo: "*"
     expo-auth-session: "*"
+    expo-secure-store: "*"
     react: "*"
     react-native: "*"
   languageName: unknown
@@ -5574,6 +5576,15 @@ __metadata:
   bin:
     expo-module: bin/expo-module.js
   checksum: 1a85033524ef44d25de0a753e29ea30657b4741620533d4b3d6516426bdd55c259f79e88ccebe01bc1ce41f567764c57a773c20d48a8d9cd8d297b9a21c2b598
+  languageName: node
+  linkType: hard
+
+"expo-secure-store@npm:^12.8.1":
+  version: 12.8.1
+  resolution: "expo-secure-store@npm:12.8.1"
+  peerDependencies:
+    expo: "*"
+  checksum: 739540167e66f70c1f2d1053251a19ff753ba9cc435b9184f0b63f22fab408d96428a3fef8e276f9f12d1b2fc61435a181f59117a19fc5f4bfd6da0487652b64
   languageName: node
   linkType: hard
 
