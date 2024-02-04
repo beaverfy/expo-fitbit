@@ -41,7 +41,7 @@ export class FitbitClient {
 
   private isTokenValid(created_at: number, expires_in: number) {
     const now = Date.now() / 1000;
-    const expiry = created_at + expires_in;
+    const expiry = created_at / 1000 + expires_in;
     return now < expiry;
   }
 
